@@ -36,7 +36,7 @@ def parse_original_node(state: ContractState, config: RunnableConfig) -> dict:
 
     response = parse_contract_image(state["path_original_contract"], model=model)
 
-    gen.update(output={"text": response.content})
+    gen.update(output={"text_extract_original_contract": response.content})
     gen.end()
 
     logger.info("Contrato original parseado.")
@@ -61,7 +61,7 @@ def parse_amendment_node(state: ContractState, config: RunnableConfig) -> dict:
 
     response = parse_contract_image(state["path_amendment_contract"], model=model)
 
-    gen.update(output={"text": response.content})
+    gen.update(output={"text_extract_amendment_contract": response.content})
     gen.end()
 
     logger.info("Contrato modificado parseado.")
@@ -82,8 +82,8 @@ def contextualization_node(state: ContractState, config: RunnableConfig) -> dict
         trace_context={"trace_id": trace_id},
         model=model,
         input={
-            "original_text_preview": state["text_extract_original_contract"],
-            "amendment_text_preview": state["text_extract_amendment_contract"],
+            "text_extract_original_contract": state["text_extract_original_contract"],
+            "text_extract_amendment_contract": state["text_extract_amendment_contract"],
         },
     )
 
@@ -115,7 +115,10 @@ def extraction_node(state: ContractState, config: RunnableConfig) -> dict:
         as_type="generation",
         trace_context={"trace_id": trace_id},
         model=model,
-        input={"contextual_map_preview": state["contextual_map"]},
+        input={"contextual_map": state["contextual_map"],
+               "text_extract_original_contract": state["text_extract_original_contract"],
+               "text_extract_amendment_contract": state["text_extract_amendment_contract"],
+               },
     )
 
     response = run_extraction_agent(

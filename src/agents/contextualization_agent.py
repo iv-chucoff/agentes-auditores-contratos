@@ -7,24 +7,41 @@ from langchain_openai import ChatOpenAI
 load_dotenv()
 
 _PROMPT = ChatPromptTemplate.from_template(
-    """Eres un analista legal especializado en comparación de contratos.
-Se te proporcionan dos documentos: el contrato original y su adenda (contrato modificado).
+"""
+    Eres un analista legal especializado en comparación de contratos.
+    Se te proporcionan dos documentos: el contrato original y su adenda.
 
---- CONTRATO ORIGINAL ---
-{original_text}
+    --- CONTRATO ORIGINAL ---
+    {original_text}
 
---- CONTRATO MODIFICADO (ADENDA) ---
-{amendment_text}
+    --- CONTRATO MODIFICADO (ADENDA) ---
+    {amendment_text}
 
-Tu tarea es construir un mapa contextual comparado. Para cada documento identifica:
-1. Las secciones o cláusulas presentes (con su numeración o nombre)
-2. El propósito o tema principal de cada sección
-3. Cómo se corresponden las secciones entre ambos documentos
+    --- TAREA ---
+    Construí un mapa estructural comparado entre ambos documentos.
+    Para cada sección o cláusula identificá:
+    1. Su nombre exacto tal como aparece en el documento.
+    2. El número de cláusula en el contrato original (o N/A si no existe).
+    3. El número de cláusula en el contrato modificado (o N/A si no existe).
+    4. Un resumen breve (1 oración) de su propósito o tema principal.
+    5. Una descripción de cómo se corresponden ambas versiones: si son idénticas, 
+       similares con cambios, renombradas, nuevas, o eliminadas.
 
-No extraigas los cambios todavía. Solo construye el mapa estructural que permita entender
-qué sección del original corresponde a qué sección de la adenda, y cuál es el contenido esperado de cada bloque.
+    No analices ni describas los cambios de contenido todavía.
+    Solo mapeá la estructura.
 
-Responde con texto estructurado claro."""
+    --- FORMATO DE RESPUESTA ---
+    Devolvé exclusivamente una tabla Markdown con exactamente estas columnas y en este orden. 
+    No agregues ningún texto antes ni después.
+
+    La tabla debe tener estas columnas: 
+    
+    | **SECCIÓN / CLÁUSULA** | **CONTRATO ORIGINAL** | **CONTRATO MODIFICADO** | **TEMA PRINCIPAL** | **CORRESPONDENCIA** |
+    |---|---|---|---|---|
+    | 1. OBJETO | 1 | 1 | Descripción del inmueble objeto de la locación. | Ambas secciones son idénticas, describiendo el mismo inmueble. |
+    | 8. SEGURO CONTRA INCENDIOS | N/A | 8 | Nueva obligación de contratar un seguro. | Esta sección es nueva en la adenda y no tiene equivalente en el original. |
+    | 9. PROHIBICIONES | 9 | N/A | Restricciones sobre el uso del inmueble. | Esta sección no está presente en la adenda. |
+"""
 )
 
 
