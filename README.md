@@ -28,7 +28,7 @@ Imágenes del contrato (original + modificado)
 
 El resultado es un archivo `.json` con la siguiente estructura:
 
-```json
+```text
 {
   "sections_changed": [
     "PRECIO Y PAGO",
