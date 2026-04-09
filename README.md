@@ -42,7 +42,14 @@ El resultado es un archivo `.json` con la siguiente estructura:
     "Obligación de seguro",
     "Restricciones de uso"
   ],
-  "summary_of_the_change": "ADICIONES: Se añade la cláusula 8, 'SEGURO CONTRA INCENDIOS', que establece la obligación de la locataria de contratar un seguro contra incendios dentro de los 30 días hábiles.\n\nELIMINACIONES: Se elimina la cláusula 9, 'PROHIBICIONES', que contenía restricciones de uso del inmueble.\n\nMODIFICACIONES: \n- PRECIO Y PAGO: Alquiler inicial: $650.000 mensuales → Alquiler inicial: $750.000 mensuales.\n- PRECIO Y PAGO: Medio: transferencia bancaria (CBU informado por la locadora) → Medio: efectivo al contado en el domicilio de la locadora.\n- DEPÓSITO: Monto: $650.000 (1 mes de alquiler) → Monto: $750.000 (1 mes de alquiler)."
+  "summary_of_the_change": "ADICIONES: Se añade la cláusula 8, 'SEGURO CONTRA INCENDIOS', que establece la obligación de la locataria de contratar un seguro contra incendios dentro de los 30 días hábiles.
+
+ELIMINACIONES: Se elimina la cláusula 9, 'PROHIBICIONES', que contenía restricciones de uso del inmueble.
+
+MODIFICACIONES:
+- PRECIO Y PAGO: Alquiler inicial: $650.000 mensuales → Alquiler inicial: $750.000 mensuales.
+- PRECIO Y PAGO: Medio: transferencia bancaria (CBU informado por la locadora) → Medio: efectivo al contado en el domicilio de la locadora.
+- DEPÓSITO: Monto: $650.000 (1 mes de alquiler) → Monto: $750.000 (1 mes de alquiler)."
 }
 ```
 
