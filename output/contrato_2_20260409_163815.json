@@ -1,0 +1,17 @@
+{
+  "sections_changed": [
+    "Plazo",
+    "Pago",
+    "Soporte",
+    "Terminación",
+    "Protección de Datos"
+  ],
+  "topics_touched": [
+    "Duración del contrato",
+    "Compensación económica",
+    "Asistencia técnica",
+    "Rescisión del contrato",
+    "Cumplimiento normativo"
+  ],
+  "summary_of_the_change": "ADICIONES: Se añade la cláusula 7. Protección de Datos, que establece el compromiso del Licenciante de cumplir con las normativas aplicables en materia de protección de datos.\nELIMINACIONES: Sin cambios.\nMODIFICACIONES: Plazo: 12 meses → 24 meses; Pago: USD 12.000 → USD 15.000; Soporte: 'vía correo electrónico' → 'vía correo electrónico y chat'; Terminación: 30 días → 60 días."
+}
