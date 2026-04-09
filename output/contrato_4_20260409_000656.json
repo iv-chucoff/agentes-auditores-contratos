@@ -1,0 +1,13 @@
+{
+  "sections_changed": [
+    "Precio",
+    "Disponibilidad del Servicio",
+    "Soporte"
+  ],
+  "topics_touched": [
+    "Tarifa mensual",
+    "Garantía de disponibilidad",
+    "Métodos de soporte"
+  ],
+  "summary_of_the_change": "ADICIONES: Sin cambios. ELIMINACIONES: Sin cambios. MODIFICACIONES: Precio: USD 1.200 → USD 1.250; Disponibilidad del Servicio: 99,5% → 99,9%; Soporte: 'vía correo electrónico' → 'vía correo electrónico y sistema de tickets en línea'."
+}

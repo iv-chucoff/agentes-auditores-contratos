@@ -1,0 +1,17 @@
+{
+  "sections_changed": [
+    "Plazo",
+    "Pago",
+    "Soporte",
+    "Terminación",
+    "Protección de Datos"
+  ],
+  "topics_touched": [
+    "Duración del contrato",
+    "Compromiso de pago",
+    "Soporte técnico",
+    "Rescisión del contrato",
+    "Cumplimiento de normativas de protección"
+  ],
+  "summary_of_the_change": "ADICIONES: Se añade la cláusula 7. Protección de Datos. \nELIMINACIONES: Sin cambios. \nMODIFICACIONES: \n- Plazo: 12 meses → 24 meses \n- Pago: USD 12.000 → USD 15.000 \n- Soporte: 'vía correo electrónico' → 'vía correo electrónico y chat' \n- Terminación: 30 días → 60 días."
+}

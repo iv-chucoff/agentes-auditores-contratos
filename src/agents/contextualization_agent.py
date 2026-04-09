@@ -4,59 +4,111 @@ from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
+from exceptions import APIError
+from logger import get_logger
+
 load_dotenv()
+logger = get_logger("contextualization-agent")
 
-_PROMPT = ChatPromptTemplate.from_template(
-"""
-    Eres un analista legal especializado en comparación de contratos.
-    Se te proporcionan dos documentos: el contrato original y su adenda.
+_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """Eres un analista legal especializado en comparación estructural de contratos.
 
-    --- CONTRATO ORIGINAL ---
-    {original_text}
+Se te proporcionarán dos documentos: el contrato original y su adenda.
 
-    --- CONTRATO MODIFICADO (ADENDA) ---
-    {amendment_text}
+--- TAREA ---
 
-    --- TAREA ---
-    Construí un mapa estructural comparado entre ambos documentos.
-    Para cada sección o cláusula identificá:
-    1. Su nombre exacto tal como aparece en el documento.
-    2. El número de cláusula en el contrato original (o N/A si no existe).
-    3. El número de cláusula en el contrato modificado (o N/A si no existe).
-    4. Un resumen breve (1 oración) de su propósito o tema principal.
-    5. Una descripción de cómo se corresponden ambas versiones: si son idénticas, 
-       similares con cambios, renombradas, nuevas, o eliminadas.
+Debes realizar un mapeo estructural EXHAUSTIVO entre ambos documentos.
 
-    No analices ni describas los cambios de contenido todavía.
-    Solo mapeá la estructura.
+### PASO 1 — IDENTIFICACIÓN DE CLÁUSULAS
+- Identificá todas las secciones o cláusulas de cada documento.
 
-    --- FORMATO DE RESPUESTA ---
-    Devolvé exclusivamente una tabla Markdown con exactamente estas columnas y en este orden. 
-    No agregues ningún texto antes ni después.
+### PASO 2 — LISTADO COMPLETO
+- Construí mentalmente dos listas:
+- Lista completa de cláusulas del contrato original
+- Lista completa de cláusulas del contrato modificado
+- NO omitir ninguna cláusula, incluso si no tiene equivalente en el otro documento.
 
-    La tabla debe tener estas columnas: 
-    
-    | **SECCIÓN / CLÁUSULA** | **CONTRATO ORIGINAL** | **CONTRATO MODIFICADO** | **TEMA PRINCIPAL** | **CORRESPONDENCIA** |
-    |---|---|---|---|---|
-    | 1. OBJETO | 1 | 1 | Descripción del inmueble objeto de la locación. | Ambas secciones son idénticas, describiendo el mismo inmueble. |
-    | 8. SEGURO CONTRA INCENDIOS | N/A | 8 | Nueva obligación de contratar un seguro. | Esta sección es nueva en la adenda y no tiene equivalente en el original. |
-    | 9. PROHIBICIONES | 9 | N/A | Restricciones sobre el uso del inmueble. | Esta sección no está presente en la adenda. |
-"""
+### PASO 3 — TABLA FINAL
+Devolvé exclusivamente una tabla Markdown con estas columnas:
+
+| **SECCIÓN / CLÁUSULA** | **CONTRATO ORIGINAL** | **CONTRATO MODIFICADO** | **TEMA PRINCIPAL** | **CORRESPONDENCIA** |
+|---|---|---|---|---|
+
+
+SECCIÓN / CLÁUSULA: Nombre de la seccion / cláusula
+CONTRATO ORIGINAL:  Escribir "Presente" si la cláusula existe en el contrato original.
+                    Escribir "N/A" si NO existe en el contrato original.
+
+CONTRATO MODIFICADO: Escribir "Presente" si la cláusula existe en el contrato modificado.
+                     Escribir "N/A" si NO existe en el contrato modificado.
+
+TEMA PRINCIPAL: tema principal
+
+CORRESPONDENCIA: Completar con una de estas categorías:
+    - Idéntica: mismo contenido en ambos.
+    - Similar: mismo contenido en ambos pero con cambios menores en el contrato modificado de redacción ó estilo, cuyo signficado semántico es el mismo.
+    - Modificada: cambios relevantes en condiciones, obligaciones ó términos en el contrato modificado.
+    - Nueva: solo existe en el contrato modificado.
+    - Eliminada: solo existe en el contrato original.
+
+
+EJEMPLO:
+
+OBJETO | Presente | Presente | Objeto del contrato | Idéntica
+PROHIBICIONES | Presente | N/A |Restricciones de uso | Eliminada
+SEGURO CONTRA INCENDIOS | N/A | Presenete | Obligación de seguro | Nueva
+
+
+--- REGLAS ---
+- Incluir TODAS las cláusulas de ambos documentos.
+- No agrupar cláusulas distintas.
+- No omitir cláusulas eliminadas o nuevas.
+- Mantener nombres EXACTOS de las cláusulas.
+- Si una cláusula no existe en uno de los documentos → usar "N/A".
+- No agregar texto fuera de la tabla.
+
+Antes de generar la tabla, verificá que la cantidad de filas sea igual a la suma de:
+- cláusulas del original
+- cláusulas nuevas del modificado
+- cláusulas eliminadas
+- verificá la columna correspondencia de la tabla contra las clásulas del contrato original y el modificado""",
+        ),
+        (
+            "human",
+            """--- CONTRATO ORIGINAL ---
+{original_text}
+
+--- CONTRATO MODIFICADO (ADENDA) ---
+{amendment_text}""",
+        ),
+    ]
 )
 
 
 def run_contextualization_agent(original_text: str, amendment_text: str, model: str):
     """Analiza la estructura de ambos contratos y devuelve el AIMessage con content y usage_metadata."""
+    logger.info("Iniciando generación del mapa contextual.")
+
     llm = ChatOpenAI(
         model=model,
-        api_key=os.getenv("OPENAI_API_KEY"),
         temperature=0.0,
+        timeout=60,
+        max_retries=2,
     )
 
     chain = _PROMPT | llm
-    return chain.invoke(
-        {
-            "original_text": original_text,
-            "amendment_text": amendment_text,
-        }
-    )
+    try:
+        response = chain.invoke(
+            {
+                "original_text": original_text,
+                "amendment_text": amendment_text,
+            }
+        )
+    except Exception as e:
+        raise APIError("openai", str(e)) from e
+
+    logger.info("Mapa contextual generado.")
+    return response

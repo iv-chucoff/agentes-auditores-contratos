@@ -9,13 +9,20 @@ from langfuse import Langfuse
 
 from agents.contextualization_agent import run_contextualization_agent
 from agents.extraction_agent import run_extraction_agent
+from exceptions import ContractAuditError
+from validations import (
+    validate_api_key,
+    validate_contract_dir,
+    validate_contract_files,
+    validate_transcription,
+)
 from image_parser import parse_contract_image
 from logger import get_logger
 from models import ContractChangeOutput, ContractState
+from output_writer import save_output
 
 load_dotenv()
 logger = get_logger("contract-analysis")
-
 
 # ---------------------------------------------------------------------------
 # Nodes
@@ -34,14 +41,16 @@ def parse_original_node(state: ContractState, config: RunnableConfig) -> dict:
         input={"paths": state["path_original_contract"]},
     )
 
-    response = parse_contract_image(state["path_original_contract"], model=model)
+    response = parse_contract_image(state["path_original_contract"], model=model, contract_type = "original")
 
-    gen.update(output={"text_extract_original_contract": response.content})
+    contract_text = response.content
+    validate_transcription("original", contract_text)
+
+    gen.update(output={"text_extract_original_contract": contract_text})
     gen.end()
 
-    logger.info("Contrato original parseado.")
     return {
-        "text_extract_original_contract": response.content,
+        "text_extract_original_contract": contract_text,
         "pipeline_steps": ["parse_original_contract"],
     }
 
@@ -59,14 +68,16 @@ def parse_amendment_node(state: ContractState, config: RunnableConfig) -> dict:
         input={"paths": state["path_amendment_contract"]},
     )
 
-    response = parse_contract_image(state["path_amendment_contract"], model=model)
+    response = parse_contract_image(state["path_amendment_contract"], model=model, contract_type = "modificado")
 
-    gen.update(output={"text_extract_amendment_contract": response.content})
+    contract_text = response.content
+    validate_transcription("modificado", contract_text)
+
+    gen.update(output={"text_extract_amendment_contract": contract_text})
     gen.end()
 
-    logger.info("Contrato modificado parseado.")
     return {
-        "text_extract_amendment_contract": response.content,
+        "text_extract_amendment_contract": contract_text,
         "pipeline_steps": ["parse_amendment_contract"],
     }
 
@@ -98,7 +109,6 @@ def contextualization_node(state: ContractState, config: RunnableConfig) -> dict
     gen.update(output={"contextual_map": contextual_map})
     gen.end()
 
-    logger.info("Mapa contextual generado.")
     return {
         "contextual_map": contextual_map,
         "pipeline_steps": ["contextualization_agent"],
@@ -128,14 +138,11 @@ def extraction_node(state: ContractState, config: RunnableConfig) -> dict:
         model=model
     )
 
-    result = response["parsed"]
-
-    gen.update(output=result.model_dump())
+    gen.update(output=response.model_dump())
     gen.end()
 
-    logger.info("Extracción de cambios completada.")
     return {
-        "final_output": result,
+        "final_output": response,
         "pipeline_steps": ["extraction_agent"],
     }
 
@@ -203,7 +210,6 @@ def main(original_paths: list[str], amendment_paths: list[str]) -> ContractChang
     root.end()
     langfuse.flush()
 
-    logger.info("Pipeline completado.")
     return result["final_output"]
 
 
@@ -213,20 +219,36 @@ if __name__ == "__main__":
         print("Ejemplo: python main.py data/test_contracts/contrato_1")
         sys.exit(1)
 
-    contract_dir = sys.argv[1]
-    original_dir = os.path.join(contract_dir, "original")
-    modified_dir = os.path.join(contract_dir, "modificado")
+    try:
+        validate_api_key(
+            "OPENAI_API_KEY",
+            "LANGFUSE_SECRET_KEY",
+            "LANGFUSE_PUBLIC_KEY",
+            "LANGFUSE_BASE_URL",
+        )
 
-    originals = sorted(glob.glob(os.path.join(original_dir, "*")))
-    amendments = sorted(glob.glob(os.path.join(modified_dir, "*")))
+        contract_dir = sys.argv[1]
 
-    if not originals:
-        print(f"No se encontraron archivos en {original_dir}")
+        #Valido que exista el contrato original y el modificado y devuelvo sus rutas
+        original_dir, modified_dir = validate_contract_dir(contract_dir)
+
+        #Ordeno los paths en caso de que un contrato tenga mas de una hoja y obtengo cada archivo que esta en la carpeta
+        originals = sorted(glob.glob(os.path.join(original_dir, "*")))
+        amendments = sorted(glob.glob(os.path.join(modified_dir, "*")))
+
+        #Valido que las carpetas no esten vacias y que el contrato no supere las 20 hojas
+        validate_contract_files(originals, amendments, original_dir, modified_dir)
+
+        output = main(originals, amendments)
+
+        filepath = save_output(output, contract_dir)
+        logger.info(f"Output guardado en: {filepath}")
+
+        logger.info("Pipeline completado exitosamente.")
+
+    except ContractAuditError as e:
+        logger.error(f"ERROR: {e}")
         sys.exit(1)
-    if not amendments:
-        print(f"No se encontraron archivos en {modified_dir}")
+    except Exception as e:
+        logger.error(f"Error inesperado: {e}")
         sys.exit(1)
-
-    output = main(originals, amendments)
-    print("\n--- RESULTADO ---")
-    print(output.model_dump_json(indent=2))

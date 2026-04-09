@@ -1,0 +1,17 @@
+{
+  "sections_changed": [
+    "Plazo",
+    "Pago",
+    "Soporte",
+    "Terminación",
+    "Protección de Datos"
+  ],
+  "topics_touched": [
+    "Duración del contrato",
+    "Compensación económica",
+    "Asistencia técnica",
+    "Causas de finalización del contrato",
+    "Cumplimiento normativo"
+  ],
+  "summary_of_the_change": "ADICIONES:\n- Se añade la cláusula 7: \"Protección de Datos\" que establece el compromiso del Licenciante de cumplir con las normativas aplicables en materia de protección de datos.\n\nELIMINACIONES:\n- Sin cambios.\n\nMODIFICACIONES:\n- **Plazo**: \n  - Texto anterior: \"El presente contrato tendrá una duración de 12 meses a partir de la fecha de firma.\"\n  - Texto nuevo: \"El presente contrato tendrá una duración de 24 meses a partir de la fecha de firma.\"\n\n- **Pago**: \n  - Texto anterior: \"El Licenciatario se compromete a pagar al Licenciante una tarifa anual de licencia de USD 12.000, pagadera dentro de los 30 días posteriores a la recepción de la factura.\"\n  - Texto nuevo: \"El Licenciatario se compromete a pagar al Licenciante una tarifa anual de licencia de USD 15.000, pagadera dentro de los 30 días posteriores a la recepción de la factura.\"\n\n- **Soporte**: \n  - Texto anterior: \"El Licenciante brindará soporte técnico vía correo electrónico durante horario laboral.\"\n  - Texto nuevo: \"El Licenciante brindará soporte técnico vía correo electrónico y chat durante horario laboral.\"\n\n- **Terminación**: \n  - Texto anterior: \"Cualquiera de las partes podrá rescindir el contrato mediante notificación escrita con 30 días de anticipación.\"\n  - Texto nuevo: \"Cualquiera de las partes podrá rescindir el contrato mediante notificación escrita con 60 días de anticipación.\""
+}
